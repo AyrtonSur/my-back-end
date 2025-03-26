@@ -1,0 +1,72 @@
+on:
+  - workflow_dispatch
+
+name: 🚀 Deploy staging website on push
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_USER: ${{ vars.VPS_USER }}
+      VPS_KEY_DEPLOY: ${{ secrets.VPS_KEY_DEPLOY }}
+    steps:
+      # 1. Verificar e rodar comandos remotos no VPS
+      - name: executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_KEY_DEPLOY }}
+          script: |
+            source ~/.bashrc
+            cd ~/dev/projects/abrario-backend
+            echo "Deploying..."
+            pwd
+            node -v
+
+      # 2. Pull do repositório
+      - name: Git Pull
+        run: |
+          cd ~/dev/projects/abrario-backend
+          git status --porcelain
+          if [[ $(git status --porcelain) ]]; then
+              echo "Uncommitted changes detected, aborting deploy."
+              exit 1
+          fi
+          git pull origin dev
+
+      # 3. Instalação de dependências
+      - name: Install dependencies
+        run: |
+          cd ~/dev/projects/abrario-backend
+          npm ci
+
+      # 4. Build da aplicação
+      - name: Build the app
+        run: |
+          cd ~/dev/projects/abrario-backend
+          npm run build
+
+      # 5. Aplicar migrações Prisma
+      - name: Run Prisma Migrations
+        run: |
+          cd ~/dev/projects/abrario-backend
+          npx prisma migrate deploy
+
+      # 6. Gerenciar o PM2
+      - name: Manage PM2 process
+        run: |
+          cd ~/dev/projects/abrario-backend
+          env ASDF_NODEJS_VERSION=$NODE_VERSION_PM2 pm2 reload ecosystem.config.js
+
+      # 7. Limpeza de cache (opcional)
+      - name: Clean npm cache
+        run: |
+          cd ~/dev/projects/abrario-backend
+          npm cache clean --force
+
+      # 8. Concluir deploy
+      - name: Deploy Completed
+        run: echo "Deploy completed successfully."
