@@ -14,7 +14,7 @@ app.listen(
     }
 
     console.log(
-      "🚀 Server running! \nServer listening at ${address}\n\nCtrl+C to Stop,"
+      `🚀 Server running! \nServer listening at ${address}\n\nCtrl+C to Stop,`,
     )
   },
 )

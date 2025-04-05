@@ -10,9 +10,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     password: z.string().min(6),
   })
 
-  const { name, email, password } = registerBodySchema.parse(
-    request.body,
-  )
+  const { name, email, password } = registerBodySchema.parse(request.body)
 
   try {
     const registerUseCase = makeRegisterUseCase()
@@ -32,4 +30,3 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
   return await reply.status(201).send('Usuário criado com sucesso')
 }
-      

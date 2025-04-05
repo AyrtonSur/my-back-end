@@ -28,6 +28,8 @@
     "zod": "3.24.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "19.8.0",
+    "@commitlint/config-conventional": "19.8.0",
     "@types/bcryptjs": "2.4.6",
     "@types/jsonwebtoken": "9.0.9",
     "@types/node": "22.13.11",
